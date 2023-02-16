@@ -1,3 +1,5 @@
+#!usr/bin/env bash
+
 # Tzolkindrier
 #
 
@@ -10,6 +12,8 @@ day=$(echo $fulldate | cut -d "-" -f 3)
 #calculate Julian day
 julian=$(((1461*($year+4800+($month-14)/12))/4+(367*($month-2-12*(($month-14)/12)))/12-(3*(($year+4900+($month-14)/12)/100))/4+$day-32075))
 
+
+# Maya calendar section
 #substract GMT correlation to get the raw Long Count day
 sinced0=$(($julian-584283))
 
@@ -30,12 +34,22 @@ tzolkin_nm=$(($sinced0%20))
 tzolkin_nm=${tzolkin_nms[(tzolkin_nm-1)]}
 
 #calculate Haab'
-haab_nms=("Pop" "Yax" "Wo'" "Sak'" "Sip" "Keh" "Sotz'" "Mak" "Sek" "K'ank'in" "Xul" "Muwan" "Yaxk'in" "Pax" "Mol" "K'ayab" "Ch'en" "Kumk'u" "Wayeb")
-haab_nm=$((((($sinced0-17)%365)+1)/20))
-haab_nm=${haab_nms[(haab_nm-1)]}
-haab_no=$(((($sinced0-17)%365)%20))
-
+haab_nms=("Pop" "Yax" "Wo'" "Sak'" "Sip" "Keh" "Sotz'" "Mak" "Sek" "K'ank'in" "Xul" "Muwan" "Yaxk'in" "Pax" "Mol" "K'ayab" "Ch'en" "Kumk'u")
+haab_nm=$((((($sinced0-17)%365)+1)))
+if [[ $haab_nm > 360 ]]; then
+    haab_no=$(echo $haab_nm | cut -c 3)
+    haab_nm="Wayeb"
+else
+    haab_nm=$(($haab_nm/20))
+    haab_nm=${haab_nms[(haab_nm-1)]}
+    haab_no=$(((($sinced0-17)%365)%20))
+    if [[ $haab_no == 0 ]]; then
+        haab_no="Seating of"
+    fi
+fi
 
 echo $baktun"."$katun"."$tun"."$uinal"."$kin"  "$tzolkin_no" "$tzolkin_nm"  "$haab_no" "$haab_nm
 
+
+# French Republican calendar section
 
