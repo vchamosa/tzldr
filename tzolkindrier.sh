@@ -1,12 +1,12 @@
 #!usr/bin/env bash
 
-# Tzolkindrier
+### Tzolkindrier ###
 #
 
 fulldate=$(date "+%F")
-#fulldate=$"1792-9-22"
-#fulldate=$"1795-9-23"
-#fulldate=$"2024-9-11"
+#fulldate=$"1992-9-21"
+fulldate=$"2023-9-22"
+#fulldate=$"1826-9-14"
 
 year=$(echo $fulldate | cut -d "-" -f 1)
 month=$(echo $fulldate | cut -d "-" -f 2)
@@ -16,7 +16,7 @@ day=$(echo $fulldate | cut -d "-" -f 3)
 julian=$(((1461*($year+4800+($month-14)/12))/4+(367*($month-2-12*(($month-14)/12)))/12-(3*(($year+4900+($month-14)/12)/100))/4+$day-32075))
 
 
-# Maya calendar section
+## Maya calendar section
 #substract GMT correlation to get the raw Long Count day
 sinced0=$(($julian-584283))
 
@@ -54,42 +54,101 @@ else
     fi
 fi
 
-echo $baktun"."$katun"."$tun"."$uinal"."$kin"  "$tzolkin_no" "$tzolkin_nm"  "$haab_no" "$haab_nm
+echo "$baktun.$katun.$tun.$uinal.$kin  $tzolkin_no $tzolkin_nm  $haab_no $haab_nm"
 
 
-# French Republican calendar section
+## French Republican calendar section
 #substract Julian day of day 0 to get the FRC day number
 sinced0=$(($julian-2375840))
 
 #calculate the FRC date
-fr_year=$((($sinced0/365)+1))
-rem=$((($sinced0%365)-($fr_year/4)+($fr_year/100)))
-fr_month=$((($rem/30)+1))
-fr_day=$((($rem%30)+1))
+annee=$((($sinced0/365)+1))
+annee=$(((($sinced0-($annee/4)+($annee/100))/365)+1))
+rem=$(((($sinced0-($annee/4)+($annee/100))%365)+1))
+mois=$((($rem/30)+1))
+jour=$(($rem%30))
+echo $annee
 
-month_nms=("Vendémiaire" "Brumaire" "Frimaire" "Nivôse" "Pluviôse" "Ventôse" "Germinal" "Floréal" "Prairial" "Messidor" "Thermidor" "Fructidor")
-if [[ $rem -lt 0 ]] || [[ $rem > 359 ]] || [[ $fr_month == 13 ]] || [[ $fr_month == 1 ]]; then
-    fr_month=""
-    if [[ $rem == 360 ]] || [[ $rem == -5 ]]; then
-        fr_day="Celebration of Virtue"
-    elif [[ $rem == 361 ]] || [[ $rem == -4 ]]; then
-        fr_day="Celebration of Talent"
-    elif [[ $rem == 362 ]] || [[ $rem == -3 ]]; then
-        fr_day="Celebration of Labour"
-    elif [[ $rem == 363 ]] || [[ $rem == -3 ]]; then
-        fr_day="Celebration of Convictions"
-    elif [[ $rem == 364 ]] || [[ $rem == -2 ]]; then
-        fr_day="Celebration of Honours"
-    elif [[ $rem == -1 ]]; then
-        fr_day="Revolution Day"
-        fr_year=$(($fr_year-1))
+if [[ $(($annee%4)) -eq 0 ]]; then
+    if [[ $(($annee%100)) -eq 0 ]]; then
+        echo "divisible by 100"
+        mois=$((($rem/30)+1))
+        jour=$(($rem%30))
+    else
+        echo "leap"
+        rem=$(($rem+1))
+        mois=$((($rem/30)+1))
+        jour=$(($rem%30))
     fi
-    echo "$fr_day, an $fr_year"
 else
-    fr_month=${month_nms[($fr_month-1)]}
-    echo "$fr_day $fr_month an $fr_year"
+    echo "non-leap"
+    mois=$((($rem/30)+1))
+    jour=$(($rem%30))
 fi
 
+echo $rem
+echo "$jour $mois an $annee"
+
+#convert the year to Roman numerals
+year2roman=$annee
+subvalue()
+{
+    annee_roman="${annee_roman}$2"
+    year2roman=$(($year2roman-$1))
+}
+while [[ $year2roman -gt 0 ]]; do
+    if [[ year2roman -ge 1000 ]]; then
+        subvalue 1000 "M"
+    elif [[ year2roman -ge 900 ]]; then
+        subvalue 900 "CM"
+    elif [[ year2roman -ge 500 ]]; then
+        subvalue 900 "D"
+    elif [[ year2roman -ge 400 ]]; then
+        subvalue 400 "CD"
+    elif [[ year2roman -ge 100 ]]; then
+        subvalue 100 "C"
+    elif [[ year2roman -ge 90 ]]; then
+        subvalue 90 "XC"
+    elif [[ year2roman -ge 50 ]]; then
+        subvalue 50 "L"
+    elif [[ year2roman -ge 40 ]]; then
+        subvalue 40 "XL"
+    elif [[ year2roman -ge 10 ]]; then
+        subvalue 10 "X"
+    elif [[ year2roman -ge 9 ]]; then
+        subvalue 9 "IX"
+    elif [[ year2roman -ge 5 ]]; then
+        subvalue 5 "V"
+    elif [[ year2roman -ge 4 ]]; then
+        subvalue 4 "IV"
+    elif [[ year2roman -ge 1 ]]; then
+        subvalue 1 "I"
+    fi
+done
+
+#put it all together, adding month names and Sansculottides
+mois_nms=("Vendémiaire" "Brumaire" "Frimaire" "Nivôse" "Pluviôse" "Ventôse" "Germinal" "Floréal" "Prairial" "Messidor" "Thermidor" "Fructidor")
+if [[ $mois == 13 ]]; then
+    mois=""
+    if [[ $rem == 361 ]]; then
+        jour="Celebration of Virtue"
+    elif [[ $rem == 362 ]]; then
+        jour="Celebration of Talent"
+    elif [[ $rem == 363 ]]; then
+        jour="Celebration of Labour"
+    elif [[ $rem == 364 ]]; then
+        jour="Celebration of Convictions"
+    elif [[ $rem == 365 ]]; then
+        jour="Celebration of Honours"
+    elif [[ $rem == 366 ]]; then
+        jour="Revolution Day"
+        annee=$(($annee-1))
+    fi
+    echo "$jour, an $annee_roman"
+else
+    mois=${mois_nms[($mois-1)]}
+    echo "$jour $mois an $annee_roman"
+fi
 
 
 
