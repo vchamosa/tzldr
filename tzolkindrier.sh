@@ -4,9 +4,6 @@
 #
 
 fulldate=$(date "+%F")
-#fulldate=$"1992-9-21"
-fulldate=$"2023-9-22"
-#fulldate=$"1826-9-14"
 
 year=$(echo $fulldate | cut -d "-" -f 1)
 month=$(echo $fulldate | cut -d "-" -f 2)
@@ -62,32 +59,24 @@ echo "$baktun.$katun.$tun.$uinal.$kin  $tzolkin_no $tzolkin_nm  $haab_no $haab_n
 sinced0=$(($julian-2375840))
 
 #calculate the FRC date
-annee=$((($sinced0/365)+1))
-annee=$(((($sinced0-($annee/4)+($annee/100))/365)+1))
+annee_rough=$((($sinced0/365)+1))
+annee=$(((($sinced0-($annee_rough/4)+($annee_rough/100))/365)+1))
 rem=$(((($sinced0-($annee/4)+($annee/100))%365)+1))
 mois=$((($rem/30)+1))
 jour=$(($rem%30))
-echo $annee
 
-if [[ $(($annee%4)) -eq 0 ]]; then
-    if [[ $(($annee%100)) -eq 0 ]]; then
-        echo "divisible by 100"
-        mois=$((($rem/30)+1))
-        jour=$(($rem%30))
-    else
-        echo "leap"
+#leap year logic
+if [[ $(($annee%4)) -eq 0 ]] || [[ ($annee_rough!=$annee) && ($(($annee_rough%4)) -eq 0) && ($rem -eq 1) ]]; then
+    if ! [[ $(($annee%100)) -eq 0 ]]; then
+        if [[ ($annee_rough!=$annee) && ($(($annee_rough%4)) -eq 0) && ($rem -eq 1) ]]; then
+            rem=$(($rem-1))
+            annee=$(($annee+1))
+        fi
         rem=$(($rem+1))
         mois=$((($rem/30)+1))
         jour=$(($rem%30))
     fi
-else
-    echo "non-leap"
-    mois=$((($rem/30)+1))
-    jour=$(($rem%30))
 fi
-
-echo $rem
-echo "$jour $mois an $annee"
 
 #convert the year to Roman numerals
 year2roman=$annee
