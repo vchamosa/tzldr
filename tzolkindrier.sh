@@ -3,14 +3,20 @@
 ### Tzolkindrier ###
 #
 
+
 fulldate=$(date "+%F")
 
-year=$(echo $fulldate | cut -d "-" -f 1)
-month=$(echo $fulldate | cut -d "-" -f 2)
-day=$(echo $fulldate | cut -d "-" -f 3)
 
-#calculate Julian day
-julian=$(((1461*($year+4800+($month-14)/12))/4+(367*($month-2-12*(($month-14)/12)))/12-(3*(($year+4900+($month-14)/12)/100))/4+$day-32075))
+## Date processing function
+julian()
+{
+    year=$(echo $fulldate | cut -d "-" -f 1)
+    month=$(echo $fulldate | cut -d "-" -f 2)
+    day=$(echo $fulldate | cut -d "-" -f 3)
+
+    #calculate Julian day
+    julian=$(((1461*($year+4800+($month-14)/12))/4+(367*($month-2-12*(($month-14)/12)))/12-(3*(($year+4900+($month-14)/12)/100))/4+$day-32075))
+}
 
 
 ## Mayan calendar function
@@ -147,17 +153,22 @@ french()
 
 
 ## Process input
-while getopts ":mf" option; do
+while getopts "mfd:" option; do
     case $option in
+        d) # Date input option
+            fulldate=$OPTARG;;
         m) # Mayan calendar
+            julian
             mayan
             exit;;
         f) # French Republican calendar
+            julian
             french
             exit;;
         \?) # Invalid option
-            echo "Please input m for the Mayan calendar or f for the French Republican calendar."
+            echo "Please pass -m for the Mayan calendar or -f for the French Republican calendar."
             exit;;
     esac
 done
+
 
