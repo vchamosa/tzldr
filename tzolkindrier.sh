@@ -4,9 +4,6 @@
 #
 
 
-fulldate=$(date "+%F")
-
-
 ## Date processing function
 julian()
 {
@@ -129,7 +126,6 @@ french()
 	#put it all together, adding month names and Sansculottides
 	mois_nms=("Vendémiaire" "Brumaire" "Frimaire" "Nivôse" "Pluviôse" "Ventôse" "Germinal" "Floréal" "Prairial" "Messidor" "Thermidor" "Fructidor")
 	if [[ $mois == 13 ]]; then
-	    mois=""
 	    if [[ $rem == 361 ]]; then
 	        jour="Celebration of Virtue"
 	    elif [[ $rem == 362 ]]; then
@@ -153,9 +149,10 @@ french()
 
 
 ## Process input
-while getopts "mfd:" option; do
+fulldate=$(date "+%F")
+while getopts "mfhd:" option; do
     case $option in
-        d) # Date input option
+        d) # date input option
             fulldate=$OPTARG;;
         m) # Mayan calendar
             julian
@@ -165,8 +162,12 @@ while getopts "mfd:" option; do
             julian
             french
             exit;;
-        \?) # Invalid option
-            echo "Please pass -m for the Mayan calendar or -f for the French Republican calendar."
+        h) # help
+            echo "For today's date, pass -m for the Mayan calendar or -f for the French Republican calendar."
+            echo "To input a specific date prefix either -m or -f with -d and the date in yyyy-m-d format."
+            exit;;
+        \?) # invalid option
+            echo "Please pass -h to learn which options are valid."
             exit;;
     esac
 done
