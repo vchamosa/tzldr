@@ -1,6 +1,10 @@
 #!/bin/bash
 
-### Tzolkindrier ###
+### tzldr ###
+#
+# Copyright (c) 2023  Victor Chamosa
+# This program is free software: you can redistribute it 
+# and/or modify it under the terms of the GNU GPL-3.0 licence.
 #
 
 
@@ -165,6 +169,7 @@ while getopts "mfhd:" option; do
         h) # help
             echo "For today's date, pass -m for the Mayan calendar or -f for the French Republican calendar."
             echo "To input a specific date, pass -d and the date in yyyy-m-d format, followed by either -m or -f."
+            echo "tzldr  copyright (c) 2023  vchamosa"
             exit;;
         \?) # invalid option
             echo "Please pass -h to learn which options are valid."
